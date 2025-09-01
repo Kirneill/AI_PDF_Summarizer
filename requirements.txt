@@ -1,0 +1,27 @@
+# Core PDF processing libraries
+pdfplumber==0.10.3
+PyPDF2==3.0.1
+pdfminer.six==20221105
+
+# Text processing and NLP
+nltk==3.8.1
+numpy>=1.26.0
+
+# Claude API and token counting
+anthropic>=0.18.0
+tiktoken>=0.5.1
+
+# Environment configuration
+python-dotenv>=1.0.0
+
+# Progress tracking
+tqdm>=4.65.0
+
+# Optional: Advanced summarization (comment out if not needed)
+# transformers==4.36.2
+# torch==2.1.2  # Required for transformers
+# sentencepiece==0.1.99  # Required for some transformer models
+
+# For better text extraction from scanned PDFs (optional)
+# pytesseract==0.3.10
+# pdf2image==1.16.3 

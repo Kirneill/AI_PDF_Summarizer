@@ -1,0 +1,190 @@
+CLAUDE PDF SUMMARIZER - USER GUIDE
+===================================
+
+OVERVIEW:
+---------
+This system uses Claude 3.5 Haiku AI to intelligently summarize PDFs through a multi-stage process:
+1. Extract text from PDF → save to .txt file
+2. Split text into manageable chunks (respecting token limits)
+3. Summarize each chunk with Claude
+4. Combine all chunk summaries
+5. Create final meta-summary using Claude
+
+QUICK START:
+------------
+1. Install dependencies:
+   pip install -r requirements.txt
+
+2. Set your Anthropic API key:
+   
+   Windows (PowerShell):
+   $env:ANTHROPIC_API_KEY = "your-api-key-here"
+   
+   Windows (Command Prompt):
+   set ANTHROPIC_API_KEY=your-api-key-here
+   
+   Linux/Mac:
+   export ANTHROPIC_API_KEY="your-api-key-here"
+
+3. Run on pdfs directory:
+   python run_claude_summarizer.py
+
+4. Check 'claude_summaries' folder for results
+
+
+COMMAND LINE USAGE:
+-------------------
+# Summarize single PDF:
+python claude_pdf_summarizer.py "path/to/file.pdf" --api-key YOUR_KEY
+
+# Summarize all PDFs in directory:
+python claude_pdf_summarizer.py "path/to/directory" --api-key YOUR_KEY
+
+# Specify custom output directory:
+python claude_pdf_summarizer.py "path/to/pdfs" --api-key YOUR_KEY --output-dir "my_summaries"
+
+# Skip re-extraction if text file exists:
+python claude_pdf_summarizer.py "path/to/pdfs" --api-key YOUR_KEY --skip-extraction
+
+
+FOLDER STRUCTURE:
+-----------------
+claude_summaries/
+├── logs/                           # Processing logs
+│   └── summarizer_YYYYMMDD_HHMMSS.log
+├── progress.json                   # Tracks processing status
+└── BookName_hash/                  # Per-document folder
+    ├── extracted_text.txt          # Full text from PDF
+    ├── chunks/                     # Text split into chunks
+    │   ├── chunk_001.txt
+    │   ├── chunk_002.txt
+    │   └── ...
+    ├── summaries/                  # Claude summaries
+    │   ├── chunk_001_summary.txt
+    │   ├── chunk_002_summary.txt
+    │   └── ...
+    ├── all_chunk_summaries.txt     # Combined chunk summaries
+    └── FINAL_SUMMARY.txt           # Meta-summary of entire document
+
+
+KEY FEATURES:
+-------------
+1. INTELLIGENT CHUNKING:
+   - Respects Claude's token limits (100k context)
+   - Splits at paragraph boundaries when possible
+   - Maintains context across chunks
+
+2. PROGRESS TRACKING:
+   - Saves progress to progress.json
+   - Can resume interrupted processing
+   - Skips already-processed documents
+   - Shows real-time progress bars
+
+3. ERROR HANDLING:
+   - Multiple PDF extraction methods with fallback
+   - Continues processing other files if one fails
+   - Detailed logging of all operations
+   - API error recovery
+
+4. TERMINAL OUTPUT:
+   - Prints each chunk summary as processed
+   - Shows final meta-summary
+   - Progress bars for long operations
+   - Clear status messages
+
+5. EFFICIENCY:
+   - Rate limiting to avoid API throttling
+   - Caches processed chunks to avoid re-processing
+   - Option to skip text extraction if already done
+
+
+HOW IT WORKS:
+-------------
+Stage 1: TEXT EXTRACTION
+  - Tries PyPDF2, pdfplumber, and pdfminer
+  - Saves full text to extracted_text.txt
+  - Handles various PDF formats
+
+Stage 2: CHUNKING
+  - Counts tokens using tiktoken
+  - Creates ~80k token chunks
+  - Preserves paragraph structure
+
+Stage 3: CHUNK SUMMARIZATION
+  - Each chunk sent to Claude with context
+  - Focuses on technical details
+  - Saves each summary individually
+
+Stage 4: COMBINATION
+  - All chunk summaries combined in one file
+  - Maintains chunk order and numbering
+
+Stage 5: META-SUMMARY
+  - Claude reviews all chunk summaries
+  - Creates cohesive final summary
+  - Identifies main themes and relationships
+
+
+API USAGE & COSTS:
+------------------
+- Model: Claude 3.5 Haiku (fastest, most cost-effective)
+- Input: $0.25 per million tokens
+- Output: $1.25 per million tokens
+
+Estimated costs per book (300 pages):
+- ~150k input tokens for chunks
+- ~10k output tokens for summaries
+- Total: ~$0.05 per book
+
+Tips to reduce costs:
+- Use --skip-extraction to avoid re-processing
+- Process specific PDFs instead of entire directories
+- Check progress.json to see what's already done
+
+
+TROUBLESHOOTING:
+----------------
+1. "ANTHROPIC_API_KEY not set":
+   - Set environment variable as shown in Quick Start
+   - Or use --api-key flag directly
+
+2. "No extractable text found":
+   - PDF might be scanned/image-based
+   - Try OCR tools first
+
+3. Rate limiting errors:
+   - Script includes 1-second delays
+   - For large batches, consider increasing delay
+
+4. Memory issues:
+   - Large PDFs are automatically chunked
+   - Processed one at a time to minimize memory
+
+5. Resuming interrupted processing:
+   - Script automatically resumes from progress.json
+   - Delete progress.json to start fresh
+
+
+ADVANCED CONFIGURATION:
+-----------------------
+Edit claude_pdf_summarizer.py to adjust:
+- chunk_size (default: 80000 tokens)
+- max_summary_tokens (default: 2000)
+- temperature (default: 0.3)
+- Rate limiting delay (default: 1 second)
+
+
+EXAMPLE OUTPUT:
+---------------
+Each chunk summary includes:
+- Key concepts and main ideas
+- Important technical details
+- Relationships between concepts
+- Code examples or algorithms
+
+Final summary provides:
+- Document's main themes and purpose
+- Most important concepts
+- Progression of ideas
+- Critical technical information
+- Clear overview for understanding 
